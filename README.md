@@ -15,12 +15,14 @@ Data source: [Kaggle "Telco" Customer Churn](https://www.kaggle.com/datasets/bla
 
 - [X] Prepare training and test datasets
 - [X] Encode categorical features
-- [ ] Create model fit function with K-Fold on ROC-AUC scoring
-    - CatBoost Model
+- [X] Create model fit function with K-Fold on ROC-AUC scoring
+    - CatBoost Model (Fix later on)
     - XGBoost Model
-    - LGBM Model
-    - Stacking Ensemble Model
-- [ ] Plot feature importance
+    - LightGBM Model
+- [X] Plot feature importances
+- [ ] Run Optuna for hyperparameter optimization
+- [ ] Create ensemble model on top of CatBoost, XGBoost and LightGBM predictions
+- [ ] Compare with baseline model performance
 
 ### Phase 3: Conclusions and Demo
 
