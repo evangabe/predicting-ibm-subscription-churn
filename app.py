@@ -29,4 +29,6 @@ No real private customer data is used in this application or in the original dat
 
 """)
 
+st.image("https://thispersondoesnotexist.com/", width=256, output_format="JPEG")
+
 st.button('Generate')
