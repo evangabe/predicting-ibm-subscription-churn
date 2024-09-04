@@ -20,7 +20,7 @@ Data source: [Kaggle "Telco" Customer Churn](https://www.kaggle.com/datasets/bla
     - XGBoost Model
     - LightGBM Model
 - [X] Plot feature importances
-- [ ] Run Optuna for hyperparameter optimization
+- [X] Run Optuna for hyperparameter optimization
 - [ ] Create ensemble model on top of CatBoost, XGBoost and LightGBM predictions
 - [ ] Compare with baseline model performance
 
@@ -29,7 +29,7 @@ Data source: [Kaggle "Telco" Customer Churn](https://www.kaggle.com/datasets/bla
 - [ ] Train and save final model with best ROC-AUC score
 - [ ] Identify strategies for reducing churn
 
-- [ ] Setup Streamlit application
+- [X] Setup Streamlit application
 - [ ] Create random customer generator (get image from [thispersondoesnotexist.com](https://thispersondoesnotexist.com))
 - [ ] Show results on random customer by model
 - [ ] Show ROC-AUC plot by model 
