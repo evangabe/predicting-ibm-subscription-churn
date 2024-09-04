@@ -13,9 +13,8 @@ Data source: [Kaggle "Telco" Customer Churn](https://www.kaggle.com/datasets/bla
 
 ### Phase 2: Models, Hyperparameters and Deployments
 
-- [ ] Prepare training and test datasets
-- [ ] Encode categorical features
-- [ ] Scale numerical features
+- [X] Prepare training and test datasets
+- [X] Encode categorical features
 - [ ] Create model fit function with K-Fold on ROC-AUC scoring
     - CatBoost Model
     - XGBoost Model
