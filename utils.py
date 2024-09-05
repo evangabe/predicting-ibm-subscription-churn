@@ -37,16 +37,33 @@ def plot_roc_auc(model, X, y):
     preds = predict_churn(model, X)
     fpr, tpr, _ = roc_curve(y, preds)
     
+    xy_range = [0, 1]
     plt.plot(fpr, tpr, 'b', label=f"AUC = {auc(fpr, tpr):.2f}")
-    plt.plot([0, 1], [0, 1], 'r--')
-    plt.xlabel('FP Rate')
-    plt.ylabel('TP Rate')
-    plt.xlim([0, 1])
-    plt.ylim([0, 1])
-    plt.title('ROC Plot')
+    plt.plot(xy_range, xy_range, 'r--')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.xlim(xy_range)
+    plt.ylim(xy_range)
+    plt.title('Retriever Operating Characteristic Curve')
     plt.legend()
 
     return plt, roc_auc_score(y, preds)
+
+# Plot Precision-Recall Curve
+def plot_precision_recall(y_hat, y_test, preds):
+    xy_range = [0, 1]
+    plt.plot(xy_range, [y_hat, y_hat], 'r--', label='Trivial Model')
+    
+    p, r, _ = precision_recall_curve(y_test, np.mean(preds, axis=1).reshape(-1,1))
+    plt.plot(r, p, 'b.', label='Ensemble Model')
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.xlim(xy_range)
+    plt.ylim(xy_range)
+    plt.title('Precision-Recall Curve')
+    plt.legend()
+
+    return plt
 
 """
 DATA

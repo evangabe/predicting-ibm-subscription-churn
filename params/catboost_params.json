@@ -1,0 +1,1 @@
+{"iterations": 6759, "colsample_bylevel": 0.023889456399295295, "depth": 10, "learning_rate": 0.020902304434613085, "objective": "Logloss", "boosting_type": "Ordered", "bootstrap_type": "Bayesian", "random_strength": 32}

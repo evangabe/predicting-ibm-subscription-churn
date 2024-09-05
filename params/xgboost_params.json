@@ -1,0 +1,1 @@
+{"max_depth": 8, "learning_rate": 0.0010229440741904832, "reg_lambda": 0.1, "colsample_bytree": 0.24784237465216777, "subsample": 0.28263597436993404, "eval_metric": "auc", "gamma": 1.0}
