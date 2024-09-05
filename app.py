@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import utils
 
+df = pd.read_csv('data/telco_customer_churn_clean.csv')
+
 st.title('Predicting Customer Churn for Subscription Service')
 
 st.markdown("""
@@ -25,58 +27,55 @@ No real private customer data is used in this application or in the original dat
 - Code Source from GitHub: 
 
             
----
-            
-### Build your customer profile
-
 """)
-
-st.image("https://thispersondoesnotexist.com/", width=256, output_format="JPEG")
 
 st.button('Generate')
 
-df_churn = pd.read_csv('../data/telco_customer_churn_clean.csv')
+def build_a_customer():
 
-def user_input_features():
-    gender = st.sidebar.selectbox('Gender', ('Male', 'Female'))
-    senior_citizen = st.sidebar.selectbox('Senior Citizen', ('Yes', 'No'))
-    partner = st.sidebar.selectbox('Partner', ('Yes', 'No'))
-    dependents = st.sidebar.selectbox('Dependents', ('Yes', 'No'))
-    phone_service = st.sidebar.selectbox('Phone Service', ('Yes', 'No', 'No phone service'))
-    multiple_lines = st.sidebar.selectbox('Multiple Lines', ('Yes', 'No'))
-    internet_service_type = st.sidebar.selectbox('Internet Service Type', ('DSL', 'Fiber optic', 'No'))
-    online_security = st.sidebar.selectbox('Online Security', ('Yes', 'No', 'No internet service'))
-    online_backup = st.sidebar.selectbox('Online Backup', ('Yes', 'No', 'No internet service'))
-    device_protection = st.sidebar.selectbox('Device Protection', ('Yes', 'No', 'No internet service'))
-    tech_support = st.sidebar.selectbox('Tech Support', ('Yes', 'No', 'No internet service'))
-    streaming_tv = st.sidebar.selectbox('Streaming TV', ('Yes', 'No', 'No internet service'))
-    streaming_movies = st.sidebar.selectbox('Streaming Movies', ('Yes', 'No', 'No internet service'))
-    contract = st.sidebar.selectbox('Contract', ('Month-to-month', 'One year', 'Two year'))
-    paperless_billing = st.sidebar.selectbox('Paperless Billing', ('Yes', 'No'))
+    st.markdown("## Build a subscriber profile:")
 
-    payment_method = st.sidebar.selectbox('PaymentMethod', (
-        'Bank transfer (automatic)', 'Credit card (automatic)', 'Mailed check', 'Electronic check'))
+    st.image("https://thispersondoesnotexist.com/", width=256, output_format="JPEG")
 
+    st.markdown("### Lifetime Value (LTV):")
 
-    # tenure slider
     tenure_range = (0, 100)
-    tenure = st.sidebar.slider("Tenure", **tenure_range, 12)
-    tenure_binned = utils.bin_value(**tenure_range, tenure)
-
-    # MonthlyCharges slider
+    tenure = st.slider("Months Subscribed", *tenure_range, 12)
+    tenure_binned = utils.bin_value(*tenure_range, tenure)
     monthlycharges_range = (0, 50)
-    monthlycharges = st.sidebar.slider("Monthly Charges (in USD)", **monthlycharges_range, 25)
-    monthlycharges_binned = utils.bin_value(**monthlycharges_range, monthlycharges)
-
-
-
-    # TotalCharges slider
+    monthlycharges = st.slider("Monthly Charges (in USD)", *monthlycharges_range, 25)
+    monthlycharges_binned = utils.bin_value(*monthlycharges_range, monthlycharges)
     totalcharges = monthlycharges * tenure
-    st.markdown(f"Total Charges:\t**${totalcharges:.2f}**")
     totalcharges_binned = "Low" # Edit later
+    st.markdown(f"Total LTV:\t**${totalcharges:.2f}**")
 
-    # Churn filter
-    data = {
+    # Subscriber Characteristics
+    st.markdown("---\n### Persona:")
+
+    gender = st.radio('Gender', ("Male", "Female"))
+    senior_citizen = st.radio('Senior Citizen', ('Yes', 'No'))
+    partner = st.radio('Partner', ('Yes', 'No'))
+    dependents = st.radio('Dependents', ('Yes', 'No'))
+
+    st.markdown("---\n### Services:")
+    phone_service = st.selectbox('Phone Service', ('Yes', 'No', 'No phone service'))
+    multiple_lines = st.radio('Multiple Phone Lines', ('Yes', 'No'))
+    internet_service_type = st.selectbox('Type of Internet Service', ('DSL', 'Fiber optic', 'No'))
+    online_security = st.selectbox('Has Online Security', ('Yes', 'No', 'No internet service'))
+    online_backup = st.selectbox('Has Online Backup', ('Yes', 'No', 'No internet service'))
+    device_protection = st.selectbox('Device Protection', ('Yes', 'No', 'No internet service'))
+    tech_support = st.selectbox('Has Technical Support', ('Yes', 'No', 'No internet service'))
+    streaming_tv = st.selectbox('Has TV Streaming', ('Yes', 'No', 'No internet service'))
+    streaming_movies = st.selectbox('Has Movie Streaming', ('Yes', 'No', 'No internet service'))
+
+    st.markdown("---\n### Payment Details:")
+    contract = st.selectbox('Contract Term', ('Month-to-month', 'One year', 'Two year'))
+    payment_method = st.selectbox('Payment Method', (
+        'Bank transfer (automatic)', 'Credit card (automatic)', 'Mailed check', 'Electronic check'))
+    paperless_billing = st.radio('Has Paperless Billing', ('Yes', 'No'))
+
+    # Create new fake user
+    return pd.DataFrame({
         'gender': [gender],
         'SeniorCitizen': [1 if senior_citizen.lower() == 'yes' else 0],
         'Partner': [partner],
@@ -96,8 +95,8 @@ def user_input_features():
         'tenure-binned': [tenure_binned],
         'MonthlyCharges-binned': [monthlycharges_binned],
         'TotalCharges-binned': [totalcharges_binned],
-    }
+    })
 
-    features = pd.DataFrame(data)
+fake_customer = build_a_customer()
 
-    return features
+churn = st.button("Will they churn?")

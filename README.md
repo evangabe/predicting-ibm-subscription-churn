@@ -21,7 +21,7 @@ Data source: [Kaggle "Telco" Customer Churn](https://www.kaggle.com/datasets/bla
     - LightGBM Model
 - [X] Plot feature importances
 - [X] Run Optuna for hyperparameter optimization
-- [ ] Create ensemble model on top of CatBoost, XGBoost and LightGBM predictions
+- [X] Create ensemble model on top of CatBoost, XGBoost and LightGBM predictions
 - [ ] Compare with baseline model performance
 
 ### Phase 3: Conclusions and Demo
