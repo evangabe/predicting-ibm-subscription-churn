@@ -30,6 +30,6 @@ Data source: [Kaggle "Telco" Customer Churn](https://www.kaggle.com/datasets/bla
 - [ ] Identify strategies for reducing churn
 
 - [X] Setup Streamlit application
-- [ ] Create random customer generator (get image from [thispersondoesnotexist.com](https://thispersondoesnotexist.com))
+- [X] Create random customer generator (get image from [thispersondoesnotexist.com](https://thispersondoesnotexist.com))
 - [ ] Show results on random customer by model
 - [ ] Show ROC-AUC plot by model 
