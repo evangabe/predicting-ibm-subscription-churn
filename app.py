@@ -1,4 +1,6 @@
 import streamlit as st
+import pandas as pd
+import utils
 
 st.title('Predicting Customer Churn for Subscription Service')
 
@@ -32,3 +34,70 @@ No real private customer data is used in this application or in the original dat
 st.image("https://thispersondoesnotexist.com/", width=256, output_format="JPEG")
 
 st.button('Generate')
+
+df_churn = pd.read_csv('../data/telco_customer_churn_clean.csv')
+
+def user_input_features():
+    gender = st.sidebar.selectbox('Gender', ('Male', 'Female'))
+    senior_citizen = st.sidebar.selectbox('Senior Citizen', ('Yes', 'No'))
+    partner = st.sidebar.selectbox('Partner', ('Yes', 'No'))
+    dependents = st.sidebar.selectbox('Dependents', ('Yes', 'No'))
+    phone_service = st.sidebar.selectbox('Phone Service', ('Yes', 'No', 'No phone service'))
+    multiple_lines = st.sidebar.selectbox('Multiple Lines', ('Yes', 'No'))
+    internet_service_type = st.sidebar.selectbox('Internet Service Type', ('DSL', 'Fiber optic', 'No'))
+    online_security = st.sidebar.selectbox('Online Security', ('Yes', 'No', 'No internet service'))
+    online_backup = st.sidebar.selectbox('Online Backup', ('Yes', 'No', 'No internet service'))
+    device_protection = st.sidebar.selectbox('Device Protection', ('Yes', 'No', 'No internet service'))
+    tech_support = st.sidebar.selectbox('Tech Support', ('Yes', 'No', 'No internet service'))
+    streaming_tv = st.sidebar.selectbox('Streaming TV', ('Yes', 'No', 'No internet service'))
+    streaming_movies = st.sidebar.selectbox('Streaming Movies', ('Yes', 'No', 'No internet service'))
+    contract = st.sidebar.selectbox('Contract', ('Month-to-month', 'One year', 'Two year'))
+    paperless_billing = st.sidebar.selectbox('Paperless Billing', ('Yes', 'No'))
+
+    payment_method = st.sidebar.selectbox('PaymentMethod', (
+        'Bank transfer (automatic)', 'Credit card (automatic)', 'Mailed check', 'Electronic check'))
+
+
+    # tenure slider
+    tenure_range = (0, 100)
+    tenure = st.sidebar.slider("Tenure", **tenure_range, 12)
+    tenure_binned = utils.bin_value(**tenure_range, tenure)
+
+    # MonthlyCharges slider
+    monthlycharges_range = (0, 50)
+    monthlycharges = st.sidebar.slider("Monthly Charges (in USD)", **monthlycharges_range, 25)
+    monthlycharges_binned = utils.bin_value(**monthlycharges_range, monthlycharges)
+
+
+
+    # TotalCharges slider
+    totalcharges = monthlycharges * tenure
+    st.markdown(f"Total Charges:\t**${totalcharges:.2f}**")
+    totalcharges_binned = "Low" # Edit later
+
+    # Churn filter
+    data = {
+        'gender': [gender],
+        'SeniorCitizen': [1 if senior_citizen.lower() == 'yes' else 0],
+        'Partner': [partner],
+        'Dependents': [dependents],
+        'PhoneService': [phone_service],
+        'MultipleLines': [multiple_lines],
+        'InternetService': [internet_service_type],
+        'OnlineSecurity': [online_security],
+        'OnlineBackup': [online_backup],
+        'DeviceProtection': [device_protection],
+        'TechSupport': [tech_support],
+        'StreamingTV': [streaming_tv],
+        'StreamingMovies': [streaming_movies],
+        'Contract': [contract],
+        'PaperlessBilling': [paperless_billing],
+        'PaymentMethod': [payment_method],
+        'tenure-binned': [tenure_binned],
+        'MonthlyCharges-binned': [monthlycharges_binned],
+        'TotalCharges-binned': [totalcharges_binned],
+    }
+
+    features = pd.DataFrame(data)
+
+    return features
