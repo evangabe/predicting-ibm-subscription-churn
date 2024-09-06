@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import OrdinalEncoder
 from xgboost import XGBClassifier
 from catboost import CatBoostClassifier
 from lightgbm import Booster
@@ -13,7 +14,7 @@ INFERENCE
 def get_model(model_name: str):
     if model_name == 'xgboost':
         model = XGBClassifier()
-        model.load_model("./models/xgboost.json")
+        model.load_model("models/xgboost.json")
     elif model_name == 'catboost':
         model = CatBoostClassifier()
         model.load_model("./models/catboost")
@@ -69,6 +70,8 @@ def plot_precision_recall(y_hat, y_test, preds):
 DATA
 """
 
+
+# Binning for numerical features
 def bin_value(feature_max, feature_min, value):
     bins = np.linspace(feature_min, feature_max, 4)
     if value <= bins[1]:
@@ -77,3 +80,17 @@ def bin_value(feature_max, feature_min, value):
         return 'Medium'
     else:
         return 'High'
+
+# Fit ordinal encoder to pretraining data
+def get_encoder(pretrain, features):
+    X_pretrain = pretrain.drop("Churn", axis=1)
+    ordinal_encoder = OrdinalEncoder()
+    X_pretrain[features] = ordinal_encoder.fit_transform(X_pretrain[features])
+    return ordinal_encoder
+
+# encode categorical features based on pretraining distributions
+def encode(encoder, features, X):
+    narr = [X[features].to_numpy()]
+    print(narr)
+    X[features] = encoder.transform(narr)[0]
+    return X

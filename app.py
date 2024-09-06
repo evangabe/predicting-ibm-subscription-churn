@@ -1,8 +1,12 @@
+from catboost import CatBoostClassifier
+from lightgbm import Booster
 import streamlit as st
 import pandas as pd
+from xgboost import XGBClassifier
 import utils
 
-df = pd.read_csv('data/telco_customer_churn_clean.csv')
+
+# df = pd.read_csv('data/telco_customer_churn_clean.csv')
 
 st.title('Predicting Customer Churn for Subscription Service')
 
@@ -25,77 +29,91 @@ I was inspired by this [article on Bagging, Boosting and Stacking Techniques](ht
 No real private customer data is used in this application or in the original dataset.
             
 ##### Resources:
-- Subscriptions Dataset from Kaggle: 
-- Code Source from GitHub: 
+- Subscriptions Dataset from IBM: [https://github.com/IBM/telco-customer-churn](https://github.com/IBM/telco-customer-churn-on-icp4d/tree/master/data)
+- Source Code from GitHub: [https://github.com/evangabe](https://github.com/evangabe)
 
             
 """)
 
 st.button('Generate')
 
-def build_a_customer():
+@st.cache_data
+def get_customer_image(name=""):
+    image_path = f"images/{name.lower()}.jpeg" if len(name) else "https://thispersondoesnotexist.com/"
+    st.sidebar.image(image_path, width=256, output_format="JPEG")
+    st.sidebar.caption("*This image is [AI-generated](https://thispersondoesnotexist.com) and does not contain a real person's face.")
 
-    st.sidebar.markdown("## Build a subscriber profile:")
+def build_a_customer(preset):
+    def populate_radio(options=('Yes', 'No'), column=None):
+        return {
+            "options": options,
+            "index": options.index(preset[column])
+        }
 
-    st.sidebar.image("https://thispersondoesnotexist.com/", width=256, output_format="JPEG")
+    # Sidebar Title and Image
+    st.sidebar.markdown("## Edit this subscriber's profile:")
+    get_customer_image(preset["name"])
 
+    # Lifetime Value (LTV) Section
     st.sidebar.markdown("### Lifetime Value (LTV):")
-
+    
     tenure_range = (0, 100)
-    tenure = st.sidebar.slider("Months Subscribed", *tenure_range, 12)
+    tenure = st.sidebar.slider("Months Subscribed", *tenure_range, value=int(preset['tenure']))
     tenure_binned = utils.bin_value(*tenure_range, tenure)
+    
     monthlycharges_range = (0, 50)
-    monthlycharges = st.sidebar.slider("Monthly Charges (in USD)", *monthlycharges_range, 25)
+    monthlycharges = st.sidebar.slider("Monthly Charges (in USD)", *monthlycharges_range, value=int(preset['MonthlyCharges']))
     monthlycharges_binned = utils.bin_value(*monthlycharges_range, monthlycharges)
+    
     totalcharges = monthlycharges * tenure
-    totalcharges_binned = "Low" # Edit later
+    totalcharges_binned = "Low"  # Edit this logic later as needed
+    
     st.sidebar.markdown(f"Total LTV:\t**${totalcharges:.2f}**")
 
-    # Subscriber Characteristics
+    # Customer Persona Section
     st.sidebar.markdown("---\n### Customer Persona:")
+    
+    name = st.sidebar.text_input('Full Name', preset['name'])
+    gender = st.sidebar.radio('Gender', **populate_radio(("Male", "Female"), "gender"))
+    senior_citizen = st.sidebar.radio('Senior Citizen', **populate_radio(column="SeniorCitizen"))
+    partner = st.sidebar.radio('Partner', **populate_radio(column="Partner"))
+    dependents = st.sidebar.radio('Dependents', **populate_radio(column="Dependents"))
 
-    name = st.sidebar.text_input('Full Name', "Jane Doe")
-    gender = st.sidebar.radio('Gender', ("Male", "Female"))
-    senior_citizen = st.sidebar.radio('Senior Citizen', ('Yes', 'No'))
-    partner = st.sidebar.radio('Partner', ('Yes', 'No'))
-    dependents = st.sidebar.radio('Dependents', ('Yes', 'No'))
-
+    # Services Section
     st.sidebar.markdown("---\n### Services:")
+
+    phone_service = st.sidebar.radio('Has Phone Service', **populate_radio(column="PhoneService"))
+    multiple_lines = st.sidebar.radio('Has Multiple Phone Lines', **populate_radio(column="MultipleLines"))
+
+    internet_service_options = ('DSL', 'Fiber optic', 'No')
+    internet_service_type = st.sidebar.selectbox('Type of Internet Service', **populate_radio(internet_service_options, "InternetService"))
     
-    # Phone service details
-    phone_service = st.sidebar.radio('Has Phone Service', ('Yes', 'No'))
-    if phone_service == 'Yes':
-        multiple_lines = st.sidebar.radio('Has Multiple Phone Lines', ('Yes', 'No'))
-    else:
-        multiple_lines = 'No phone service'
-    
-    # Internet service details
-    internet_service_type = st.sidebar.selectbox('Type of Internet Service', ('DSL', 'Fiber optic', 'No'))
+    # Internet services details based on the type
     if internet_service_type != 'No':
-        online_security = st.sidebar.radio('Has Online Security', ('Yes', 'No'))
-        online_backup = st.sidebar.radio('Has Online Backup', ('Yes', 'No'))
-        device_protection = st.sidebar.radio('Has Device Protection', ('Yes', 'No'))
-        tech_support = st.sidebar.radio('Has Technical Support', ('Yes', 'No'))
-        streaming_tv = st.sidebar.radio('Has TV Streaming', ('Yes', 'No'))
-        streaming_movies = st.sidebar.radio('Has Movie Streaming', ('Yes', 'No'))
+        online_security = st.sidebar.radio('Has Online Security', **populate_radio(column="OnlineSecurity"))
+        online_backup = st.sidebar.radio('Has Online Backup', **populate_radio(column="OnlineBackup"))
+        device_protection = st.sidebar.radio('Has Device Protection', **populate_radio(column="DeviceProtection"))
+        tech_support = st.sidebar.radio('Has Technical Support', **populate_radio(column="TechSupport"))
+        streaming_tv = st.sidebar.radio('Has TV Streaming', **populate_radio(column="StreamingTV"))
+        streaming_movies = st.sidebar.radio('Has Movie Streaming', **populate_radio(column="StreamingMovies"))
     else:
-        online_security = 'No internet service'
-        online_backup = 'No internet service'
-        device_protection = 'No internet service'
-        tech_support = 'No internet service'
-        streaming_tv = 'No internet service'
-        streaming_movies = 'No internet service'
+        online_security = online_backup = device_protection = tech_support = streaming_tv = streaming_movies = 'No internet service'
 
+    # Payment Details Section
     st.sidebar.markdown("---\n### Payment Details:")
-    contract = st.sidebar.selectbox('Contract Term', ('Month-to-month', 'One year', 'Two year'))
-    payment_method = st.sidebar.selectbox('Payment Method', (
-        'Bank transfer (automatic)', 'Credit card (automatic)', 'Mailed check', 'Electronic check'))
-    paperless_billing = st.sidebar.radio('Has Paperless Billing', ('Yes', 'No'))
+    
+    contract_options = ('Month-to-month', 'One year', 'Two year')
+    contract = st.sidebar.selectbox('Contract Term', **populate_radio(contract_options, "Contract"))
+    
+    payment_method_options = ('Bank transfer (automatic)', 'Credit card (automatic)', 'Mailed check', 'Electronic check')
+    payment_method = st.sidebar.selectbox('Payment Method', **populate_radio(payment_method_options, "PaymentMethod"))
+    
+    paperless_billing = st.sidebar.radio('Has Paperless Billing', **populate_radio(column="PaperlessBilling"))
 
-    # Create new fake user
+    # Create DataFrame with Subscriber Information
     return pd.DataFrame({
         'gender': [gender],
-        'SeniorCitizen': [1 if senior_citizen.lower() == 'yes' else 0],
+        'SeniorCitizen': [1 if senior_citizen == 'Yes' else 0],
         'Partner': [partner],
         'Dependents': [dependents],
         'PhoneService': [phone_service],
@@ -110,12 +128,11 @@ def build_a_customer():
         'Contract': [contract],
         'PaperlessBilling': [paperless_billing],
         'PaymentMethod': [payment_method],
-        'tenure-binned': [tenure_binned],
-        'MonthlyCharges-binned': [monthlycharges_binned],
-        'TotalCharges-binned': [totalcharges_binned],
+        'tenure_binned': [tenure_binned],
+        'MonthlyCharges_binned': [monthlycharges_binned],
+        'TotalCharges_binned': [totalcharges_binned],
     })
 
-fake_customer_df = build_a_customer()
 
 # To implement basic inference:
 # [ ] Encode fake_customer categories based on encoding for X_train
@@ -127,4 +144,46 @@ fake_customer_df = build_a_customer()
 # [ ] Generate fake customer by sampling features from X_train distribution
 # [ ] Add fake customer examples
 
-churn = st.sidebar.button("Will they churn?")
+# Create tabs
+inference_tab, educational_tab = st.tabs(('Run inference', 'Learn more'))
+
+# Inference tab
+inference_tab.header("Inference")
+
+# Example customer select
+@st.cache_data
+def get_example_customers():
+    return pd.read_json("./data/fake_customers.json")
+    
+example_customers = get_example_customers()
+preset = inference_tab.selectbox("Choose an example subscriber", example_customers.columns)
+
+fake_customer_df = build_a_customer(example_customers[preset])
+
+@st.cache_data
+def cached_get_model(model_name: str):
+    return utils.get_model(model_name)
+
+@st.cache_data
+def cached_get_all_models():
+    return [utils.get_model("xgboost"), utils.get_model("catboost"), utils.get_model("lightgbm")]
+
+@st.cache_data
+def cached_encoder():
+    pretrain_df = pd.read_pickle("data/pretrain_decoded.pkl")
+    features = list(set(pretrain_df.columns) - set(pretrain_df._get_numeric_data().columns) - set(["Churn"]))
+    return utils.get_encoder(pretrain_df, features), features
+
+ordinal_encoder, features = cached_encoder()
+
+@st.cache_data
+def cached_predict():
+    inference_tab.table(fake_customer_df)
+    fake_customer_df[features] = ordinal_encoder.transform(fake_customer_df[features])[0]
+    models = cached_get_all_models()
+    xgboost_result = utils.predict_churn(models[0], fake_customer_df)[0]
+    catboost_result = utils.predict_churn(models[1], fake_customer_df)[0]
+    lightgbm_result = utils.predict_churn(models[2], fake_customer_df)[0]
+    inference_tab.table(pd.DataFrame({"XGBoost": f"{xgboost_result*100:.2f}%", "CatBoost": f"{catboost_result*100:.2f}%", "LightGBM": f"{lightgbm_result*100:.2f}%"}, index=["Chance of Churn"]))
+
+cached_predict()
