@@ -16,7 +16,7 @@ Data source: [Kaggle "Telco" Customer Churn](https://www.kaggle.com/datasets/bla
 - [X] Prepare training and test datasets
 - [X] Encode categorical features
 - [X] Create model fit function with K-Fold on ROC-AUC scoring
-    - CatBoost Model (Fix later on)
+    - CatBoost Model
     - XGBoost Model
     - LightGBM Model
 - [X] Plot feature importances
