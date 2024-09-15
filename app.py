@@ -135,14 +135,14 @@ def build_a_customer(preset):
 
 
 # To implement basic inference:
-# [ ] Encode fake_customer categories based on encoding for X_train
-# [ ] Retrieve model
-# [ ] Make prediction using predict_proba() on click
+# [X] Encode fake_customer categories based on encoding for X_train
+# [X] Retrieve model
+# [X] Make prediction using predict_proba() on click
 
 # For advanced inference:
-# [ ] Allow user to select model
-# [ ] Generate fake customer by sampling features from X_train distribution
-# [ ] Add fake customer examples
+# [X] Allow user to select model
+# [-] Generate fake customer by sampling features from X_train distribution
+# [X] Add fake customer examples
 
 # Create tabs
 inference_tab, educational_tab = st.tabs(('Run inference', 'Learn more'))
@@ -178,12 +178,89 @@ ordinal_encoder, features = cached_encoder()
 
 @st.cache_data
 def cached_predict():
-    inference_tab.table(fake_customer_df)
     fake_customer_df[features] = ordinal_encoder.transform(fake_customer_df[features])[0]
     models = cached_get_all_models()
     xgboost_result = utils.predict_churn(models[0], fake_customer_df)[0]
     catboost_result = utils.predict_churn(models[1], fake_customer_df)[0]
     lightgbm_result = utils.predict_churn(models[2], fake_customer_df)[0]
-    inference_tab.table(pd.DataFrame({"XGBoost": f"{xgboost_result*100:.2f}%", "CatBoost": f"{catboost_result*100:.2f}%", "LightGBM": f"{lightgbm_result*100:.2f}%"}, index=["Chance of Churn"]))
+    return pd.DataFrame({"XGBoost": f"{xgboost_result*100:.2f}%", "CatBoost": f"{catboost_result*100:.2f}%", "LightGBM": f"{lightgbm_result*100:.2f}%"}, index=["Chance of Churn"])
 
-cached_predict()
+inference_tab.table(fake_customer_df)
+prediction_results = cached_predict()
+inference_tab.table(prediction_results)
+
+educational_tab.header("Learn More")
+
+
+# XGBoost Explanation
+xgboost_accordion = educational_tab.expander("XGBoost", True)
+xgboost_accordion.markdown("""
+**XGBoost (Extreme Gradient Boosting)** is an efficient and scalable implementation of gradient boosting for decision trees. 
+It improves on traditional gradient boosting by using a combination of optimized regularization techniques and scalable parallel computing. 
+The model works by constructing a sequence of decision trees, where each tree attempts to correct the errors of the previous ones.
+""")
+
+xgboost_accordion.markdown("#### Key Formula")
+xgboost_accordion.latex(r"""
+\text{Obj}(\theta) = \sum_{i=1}^{n} l(y_i, \hat{y}_i) + \sum_{k=1}^{K} \Omega(f_k)
+""")
+
+xgboost_accordion.markdown("""
+Where:
+- $l(y_i, \hat{y}_i)$ is the loss function (e.g., mean squared error).
+- $\Omega(f_k)$ is the regularization term controlling model complexity.
+""")
+xgboost_accordion.latex(r"""
+\Omega(f_k) = \gamma T + \frac{1}{2} \lambda ||w||^2
+""")
+
+xgboost_accordion.markdown("""
+- $T$ is the number of leaves in the tree, and $w$ represents leaf weights.
+
+XGBoost also uses second-order Taylor expansion to approximate the loss, which improves convergence speed.
+""")
+
+# CatBoost Explanation
+catboost_accordion = educational_tab.expander("CatBoost")
+catboost_accordion.markdown("""
+**CatBoost** is a gradient boosting algorithm designed to handle categorical features more effectively. 
+It automates the process of encoding categorical variables and reduces the risk of overfitting by using techniques like ordered boosting, which helps minimize prediction bias.
+""")
+
+catboost_accordion.markdown("#### Key Process")
+catboost_accordion.latex(r"""
+TE(x_i) = \frac{\sum_{j \neq i} y_j}{\sum_{j \neq i} 1}
+""")
+
+catboost_accordion.markdown("""
+Where:
+- $x_i$ is a categorical feature.
+- $y_j$ represents the target variable for the corresponding categorical feature $x_j$.
+
+Additionally, CatBoost's **ordered boosting** prevents information leakage by ensuring that each prediction only uses data points that were available in previous steps.
+""")
+
+# LightGBM Explanation
+lightgbm_accordion = educational_tab.expander("LightGBM")
+lightgbm_accordion.markdown("""
+**LightGBM** (Light Gradient Boosting Machine) is another gradient boosting framework designed for high efficiency and performance. 
+It improves on traditional models by using techniques such as histogram-based decision tree learning and leaf-wise tree growth.
+""")
+
+lightgbm_accordion.markdown("#### Key Formula")
+lightgbm_accordion.latex(r"""
+\text{Obj}(\theta) = \sum_{i=1}^{n} l(y_i, \hat{y}_i) + \lambda ||\theta||^2
+""")
+
+lightgbm_accordion.markdown("""
+LightGBM constructs decision trees using the **leaf-wise growth strategy**, which grows the leaf with the highest loss reduction, rather than growing level-wise:
+""")
+
+lightgbm_accordion.latex(r"""
+\Delta \text{loss} = \frac{(G_L + G_R)^2}{H_L + H_R + \lambda} - \left( \frac{G_L^2}{H_L + \lambda} + \frac{G_R^2}{H_R + \lambda} \right)
+""")
+
+lightgbm_accordion.markdown("""
+Where:
+- $G_L$ and $G_R$ are the gradient sums for the left and right leaves.
+""")
