@@ -34,7 +34,19 @@ PLOTTING
 """
 
 # Plot Retriever Operating Characteristic Area-Under Curve (ROC-AUC)
-def plot_roc_auc(model, X, y):
+def plot_roc_curve(model, X, y):
+    """
+    Given true labels `y`, plot the ROC Curve for model predictions on test set `X`.
+
+    Args:
+        model (Object): The model used to make predictions on test set `X`.
+        X (Object): The test set DataFrame whose predictions will be compared to true labels `y`
+        y (List[int]): The true labels (`0` = No Churn, `1` = Churn)
+    
+    Returns:
+        (Object, float): Tuple containing Matplotlib figure and ROC-AUC score
+    """
+
     preds = predict_churn(model, X)
     fpr, tpr, _ = roc_curve(y, preds)
     
@@ -51,20 +63,35 @@ def plot_roc_auc(model, X, y):
     return plt, roc_auc_score(y, preds)
 
 # Plot Precision-Recall Curve
-def plot_precision_recall(y_hat, y_test, preds):
+def plot_precision_recall_curve(model, X, y):
+    """
+    Given true labels `y`, plot the PR Curve for model predictions on test set `X`.
+
+    Args:
+        model (Object): The model used to make predictions on test set `X`.
+        X (Object): The test set DataFrame whose predictions will be compared to true labels `y`
+        y (List[int]): The true labels (`0` = No Churn, `1` = Churn)
+    
+    Returns:
+        (Object, float): Tuple containing Matplotlib figure and F1 score
+    """
+
+    preds = predict_churn(model, X)
+    y_hat = np.mean(y)
     xy_range = [0, 1]
     plt.plot(xy_range, [y_hat, y_hat], 'r--', label='Trivial Model')
     
-    p, r, _ = precision_recall_curve(y_test, np.mean(preds, axis=1).reshape(-1,1))
-    plt.plot(r, p, 'b.', label='Ensemble Model')
+    p, r, _ = precision_recall_curve(y, np.mean(preds, axis=1).reshape(-1,1))
+    plt.plot(r, p, 'b.')
     plt.xlabel('Recall')
     plt.ylabel('Precision')
     plt.xlim(xy_range)
     plt.ylim(xy_range)
     plt.title('Precision-Recall Curve')
-    plt.legend()
 
-    return plt
+    f1 = f1_score(y, preds)
+
+    return plt, f1
 
 """
 DATA

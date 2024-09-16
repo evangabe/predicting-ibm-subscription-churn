@@ -31,5 +31,5 @@ Data source: [Kaggle "Telco" Customer Churn](https://www.kaggle.com/datasets/bla
 
 - [X] Setup Streamlit application
 - [X] Create random customer generator (get image from [thispersondoesnotexist.com](https://thispersondoesnotexist.com))
-- [ ] Show results on random customer by model
+- [X] Show results on random customer by model
 - [ ] Show ROC-AUC plot by model 

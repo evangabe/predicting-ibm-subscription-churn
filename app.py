@@ -194,6 +194,7 @@ educational_tab.header("Learn More")
 
 # XGBoost Explanation
 xgboost_accordion = educational_tab.expander("XGBoost", True)
+xgboost_accordion.image("./images/roc_xgboost.png", width=512)
 xgboost_accordion.markdown("""
 **XGBoost (Extreme Gradient Boosting)** is an efficient and scalable implementation of gradient boosting for decision trees. 
 It improves on traditional gradient boosting by using a combination of optimized regularization techniques and scalable parallel computing. 
@@ -221,7 +222,9 @@ XGBoost also uses second-order Taylor expansion to approximate the loss, which i
 """)
 
 # CatBoost Explanation
+# TODO - Add ROC Curve here
 catboost_accordion = educational_tab.expander("CatBoost")
+catboost_accordion.image("./images/roc_catboost.png", width=512)
 catboost_accordion.markdown("""
 **CatBoost** is a gradient boosting algorithm designed to handle categorical features more effectively. 
 It automates the process of encoding categorical variables and reduces the risk of overfitting by using techniques like ordered boosting, which helps minimize prediction bias.
@@ -242,6 +245,7 @@ Additionally, CatBoost's **ordered boosting** prevents information leakage by en
 
 # LightGBM Explanation
 lightgbm_accordion = educational_tab.expander("LightGBM")
+lightgbm_accordion.image("./images/roc_lightgbm.png", width=512)
 lightgbm_accordion.markdown("""
 **LightGBM** (Light Gradient Boosting Machine) is another gradient boosting framework designed for high efficiency and performance. 
 It improves on traditional models by using techniques such as histogram-based decision tree learning and leaf-wise tree growth.
