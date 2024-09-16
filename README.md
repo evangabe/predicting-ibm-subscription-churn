@@ -22,14 +22,14 @@ Data source: [Kaggle "Telco" Customer Churn](https://www.kaggle.com/datasets/bla
 - [X] Plot feature importances
 - [X] Run Optuna for hyperparameter optimization
 - [X] Create ensemble model on top of CatBoost, XGBoost and LightGBM predictions
-- [ ] Compare with baseline model performance
+- [X] Compare with baseline model performance
 
 ### Phase 3: Conclusions and Demo
 
-- [ ] Train and save final model with best ROC-AUC score
+- [X] Train and save final model with best ROC-AUC score
 - [ ] Identify strategies for reducing churn
 
 - [X] Setup Streamlit application
 - [X] Create random customer generator (get image from [thispersondoesnotexist.com](https://thispersondoesnotexist.com))
 - [X] Show results on random customer by model
-- [ ] Show ROC-AUC plot by model 
+- [X] Show ROC curve plot by model 
