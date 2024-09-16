@@ -183,7 +183,7 @@ def cached_predict(df):
     return pd.DataFrame({"XGBoost": f"{xgboost_result*100:.2f}%", "CatBoost": f"{catboost_result*100:.2f}%", "LightGBM": f"{lightgbm_result*100:.2f}%"}, index=["Chance of Churn"])
 
 inference_tab.table(fake_customer_df)
-prediction_results = cached_predict()
+prediction_results = cached_predict(fake_customer_df)
 inference_tab.table(prediction_results)
 
 educational_tab.header("Learn More")
